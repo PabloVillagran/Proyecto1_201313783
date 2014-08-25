@@ -1,0 +1,16 @@
+package llGame;
+
+import java.util.Scanner;
+
+public class Juego {
+	Scanner sc = new Scanner(System.in);
+	int tk;
+	String mazo [] = new String[16];
+	
+	
+	public Juego(int tokens){
+		this.tk=tokens;
+		
+	}
+	
+}
