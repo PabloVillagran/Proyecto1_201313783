@@ -1,5 +1,6 @@
 package llGame;
 
+import java.io.IOException;
 import java.util.Scanner;
 
 class Interfaz {
@@ -19,7 +20,6 @@ class Interfaz {
 		this.menu1();
 	}
 	
-	@SuppressWarnings ("unused")
 	void menu1(){
 		String op;
 		System.out.println("-=Bienvenido a Love Letter=-\n"

@@ -47,11 +47,10 @@ public class Juego {
 		if(op.contains("1")){
 			String value = manoj[1];
 			if(value.contains("(7) Countess")){
-				if(manoj[0].contains("(5) Prince") || value.contains("(6) King")){
-					System.out.println("Descarte de Countess obligatorio!");
-					carta("7",1);
-					sc.next();
-				}
+				
+			}
+			if(value.contains("(5) Prince") || value.contains("(6) King")){
+				
 			}
 			carta(manoj[0].substring(manoj[0].indexOf("!")+1), p);
 			fuera = fuera+", " + manoj[0].substring(manoj[0].indexOf("!")+1);

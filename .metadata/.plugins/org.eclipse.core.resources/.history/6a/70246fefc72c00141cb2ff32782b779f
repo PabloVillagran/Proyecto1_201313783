@@ -49,8 +49,8 @@ public class Juego {
 			if(value.contains("(7) Countess")){
 				if(manoj[0].contains("(5) Prince") || value.contains("(6) King")){
 					System.out.println("Descarte de Countess obligatorio!");
-					carta("7",1);
 					sc.next();
+					carta("7",1);
 				}
 			}
 			carta(manoj[0].substring(manoj[0].indexOf("!")+1), p);

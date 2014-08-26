@@ -7,7 +7,7 @@ import llGame.Interfaz;
 public class Juego {
 	Scanner sc = new Scanner(System.in);
 	int tk;
-	String cartas [] = {"1","1","1","1","1","2","2","3","3","4","4","5","5","6","7","8"};
+	String cartas [] = {"1","1","1","1","1","1","1","1","1","1","1","1","1","1","1","1"};
 	String mazo[]= new String[16],fuera,op;
 	String [] jugador1=new String[2], jugador2=new String[2];
 	String[] manoj= new String[2], manoc = new String [2];
@@ -45,14 +45,6 @@ public class Juego {
 		op=sc.next();
 		System.out.println("Ha jugado " + op);
 		if(op.contains("1")){
-			String value = manoj[1];
-			if(value.contains("(7) Countess")){
-				if(manoj[0].contains("(5) Prince") || value.contains("(6) King")){
-					System.out.println("Descarte de Countess obligatorio!");
-					carta("7",1);
-					sc.next();
-				}
-			}
 			carta(manoj[0].substring(manoj[0].indexOf("!")+1), p);
 			fuera = fuera+", " + manoj[0].substring(manoj[0].indexOf("!")+1);
 			manoj[0]=manoj[1];
@@ -180,8 +172,10 @@ public class Juego {
 		
 		System.out.println("Alto ahi!, ¿Quien es usted?");
 		jugador1[0] = sc.next();
+		if(jugador1[0]==null)jugador1[0]="Jugador1";
 		System.out.println("¿Conoces a tu oponente?, ¿Quien es?");
 		jugador2[0] = sc.next();
+		if(jugador2[0]==null)jugador2[0]="computadora";
 		
 		System.out.println("Ve, busca a la princesa o a alguien que le pueda entregar tu carta!\n");
 		String oculta = mazo[15];
