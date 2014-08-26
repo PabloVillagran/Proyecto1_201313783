@@ -48,7 +48,6 @@ class Interfaz {
 				System.out.println("Cantidad de tokens par\n "
 						+ "Se cambiara el numero de tokens a "+ (tokens-1));
 				tokens--;
-				menu1();
 			}
 			this.menu1();
 			break;
