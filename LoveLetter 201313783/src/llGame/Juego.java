@@ -21,6 +21,8 @@ public class Juego {
 	}
 
 	void barajear(){
+		for(int j=0; j<=15; j++)mazo[j]=0;
+		nmazo=16;
 		for(int i=0; i<=15;i++){
 			while(mazo[i]==0){
 				//System.out.println("-JUEGO-");
@@ -42,23 +44,27 @@ public class Juego {
 		
 		if(p==0){
 			System.out.println("Alto ahi!, ¿Quien es usted?");
-			jugador1 = sc.next();
+			jugador1 = sc.nextLine();
 			System.out.println("¿Conoces a tu oponente?, ¿Quien es?");
-			jugador2 = sc.next();
+			jugador2 = sc.nextLine();
 			System.out.println("Ve, busca a la princesa o a alguien que le pueda entregar tu carta!\n");
+			p=1;
 		}
 		
 		String oculta = String.valueOf(mazo[15]);
 		fuera = mazo[12]+", "+mazo[13]+", "+mazo[14];
-		nmazo = 10;
-		for(int i=15;i>=12;i--)mazo[i]=0;
 		manoj[0]=mazo[11]; 
 		manoc[0]=mazo[10];
-		mazo[11]=0;mazo[10]=0;
+		for(int i=15;i>=10;i--)mazo[i]=0;
+		nmazo = 10;
+		
 		while(round){
 			turno(p);
+			if(mazo[0]==0){
+				carta(3);
+			}
 		}
-
+		
 		if(tkp1<tk || tkp2<tk){
 			barajear();
 		}else{
@@ -79,7 +85,8 @@ public class Juego {
 			nmazo--;
 			interfaz();
 			p++;
-		}else{
+		}
+		if(q==2){
 			manoc[1]=mazo[nmazo-1];
 			mazo[nmazo-1]=0;
 			nmazo--;
@@ -115,12 +122,12 @@ public class Juego {
 		
 		System.out.println("Ha jugado " + op);
 		if(op.contains("1")){
-			carta(manoj[0], p);
+			carta(manoj[0]);
 			fuera = fuera+", " + manoj[0];
 			manoj[0]=manoj[1];
 			manoj[1]=0;
 		}else if(op.contains("2")){
-			carta(manoj[1], p);
+			carta(manoj[1]);
 			fuera = fuera+", " + manoj[1];
 			manoj[1]=0;
 		}else if(op.contains("3")){
@@ -137,7 +144,7 @@ public class Juego {
 		
 	}
 
-	void carta(int numero, int t) {
+	void carta(int numero) {
 		switch(numero){
 		case 1:
 			System.out.println("Adivine la carta carta de "+ jugador2+":\n"
@@ -147,6 +154,7 @@ public class Juego {
 			if(sc.next().compareTo(String.valueOf(manoc[0]))== 0){
 				System.out.println("Has descubierto a tu oponente! Ganas el round");
 				tkp1++;
+				p=0;
 				round = false;
 			}else{
 				System.out.println("Incorrecto!");
@@ -157,42 +165,28 @@ public class Juego {
 					Interfaz.reglas[Integer.valueOf(manoc[0])]);
 			break;
 		case 3:
+			int valor=0;
 			if(op.contains("1")){
-				int valor=manoj[0];
-				int valo2=manoc[0];
-				System.out.println("Tu carta es "
-						+Interfaz.reglas[valor].substring(0,Interfaz.reglas[valor].indexOf("<")-1)
-						+" La carta de "+jugador2+" es " 
-						+Interfaz.reglas[valo2].substring(0,Interfaz.reglas[valo2].indexOf("<")-1)
-				);
-				if(valor > valo2){
-					System.out.println("Tu carta es mayor! ganas la ronda!");
-					tkp1++;
-					round = false;
-				}
-				if(valor < valo2){
-					System.out.println("Tu carta es menor! pierdes la ronda!");
-					tkp2++;
-					round = false;
-				}
+				valor=manoj[0];
 			}if(op.contains("2")){
-				int valor=manoj[1];
-				int valo2=manoc[0];
-				System.out.println("Tu carta es "
-						+Interfaz.reglas[valor].substring(0,Interfaz.reglas[valor].indexOf("<")-1)
-						+" La carta de "+jugador2+" es " 
-						+Interfaz.reglas[valo2].substring(0,Interfaz.reglas[valo2].indexOf("<")-1)
-				);
-				if(valor > valo2){
-					System.out.println("Tu carta es mayor! ganas la ronda!");
-					tkp1++;
-					round = false;
-				}
-				if(valor < valo2){
-					System.out.println("Tu carta es menor! pierdes la ronda!");
-					tkp2++;
-					round = false;
-				}
+				valor=manoj[1];
+			}
+			System.out.println("Tu carta es "
+					+Interfaz.reglas[valor].substring(0, Interfaz.reglas[valor].indexOf(":")-1)
+					+" La carta de "+jugador2+" es " 
+					+Interfaz.reglas[manoc[0]].substring(0, Interfaz.reglas[valor].indexOf(":")-1)
+			);
+			if(valor > manoc[0]){
+				System.out.println("Tu carta es mayor! ganas la ronda!");
+				tkp1++;
+				p=0;
+				round = false;
+			}
+			if(valor < manoc[0]){
+				System.out.println("Tu carta es menor! pierdes la ronda!");
+				tkp2++;
+				p=1;
+				round = false;
 			}
 			break;
 		case 4:
@@ -202,17 +196,24 @@ public class Juego {
 		case 5:
 			System.out.println("Deseas descartar tu mano o la de tu oponente?\n"
 					+ "(1) tu mano?\n (2) su mano?");
-			if(sc.next().contains("1") || handmaid[1]){
+			if(sc.next().contains("1")){
 				manoj[0]=mazo[nmazo-1];
 				mazo[nmazo-1]=0;
 				nmazo--;
-			}else if(sc.next().contains("2") && !handmaid[1]){
-				manoc[0]=mazo[nmazo-1];
-				mazo[nmazo-1]=0;
-				nmazo--;
+			}else if((sc.next().contains("2")) && (!handmaid[1])){
+				if(manoc[0]==8){
+					System.out.println(jugador2 + " ha descartado a la princesa! Ganas el round!");
+					tkp1++;
+					p=0;
+					round=false;
+				}else{
+					manoc[0]=mazo[nmazo-1];
+					mazo[nmazo-1]=0;
+					nmazo--;
+				}
 			}else{
 				System.out.println("Ingresa una opcion valida!");
-				carta(5,t);
+				carta(5);
 			}
 			break;
 		case 6:
@@ -235,6 +236,7 @@ public class Juego {
 		case 8:
 			System.out.println("La princesa ha sido descartada! pierdes la ronda.");
 			tkp2++;
+			p=1;
 			break;
 		}
 	
@@ -244,90 +246,67 @@ public class Juego {
 		System.out.println(jugador2 + ": Ahora es mi turno!");
 		
 		int jugada=0;
-		if(manoc[0]==8){
-			jugada=manoc[1];
-		}if(manoc[1]==8){
-			jugada=manoc[0];
-		}
+		if(manoc[0]==8)jugada=manoc[1];
+		if(manoc[1]==8)jugada=manoc[0];
 		if(manoc[0]==7 && (manoc[1]==5||manoc[1]==6)){
 			jugada=manoc[0];
 		}else{jugada=manoc[1];} 
 		if(manoc[1]==7 && (manoc[0]==5||manoc[0]==6)){
 			jugada=manoc[1];
 		}else{jugada=manoc[0];}
-		if(manoc[0]==6 && manoc[1]<6){
-			jugada=manoc[1];
-		}
-		if(manoc[1]==6 && manoc[0]<6){
-			jugada=manoc[0];
-		}
-		if((manoc[0]==5 && manoc[1]==4)||(manoc[0]==5 && manoc[1]==1)){
-			jugada=manoc[1];
-		}
-		if((manoc[1]==5 && manoc[0]==4)||(manoc[1]==5 && manoc[0]==1)){
-			jugada=manoc[0];
-		}
-		if((manoc[0]==5 && fuera.contains("8"))||(manoc[0]==5&&manoc[1]<4)){
-			jugada=manoc[0];
-		}
-		if((manoc[1]==5 && fuera.contains("8"))||(manoc[1]==5&&manoc[0]<4)){
-			jugada=manoc[1];
-		}
-		if(manoc[0]==4 && manoc[1]==4){
-			jugada=manoc[0];
-		}
-		if(manoc[0]==4 && manoc[1]<4){
-			jugada=manoc[1];
-		}
-		if(manoc[0]==4 && manoc[1]<4){
-			jugada=manoc[1];
-		}
-		if(manoc[1]==4 && manoc[0]<4){
-			jugada=manoc[0];
-		}
-		if(manoc[0]==3 && manoc[1]==3){
-			jugada=manoc[0];
-		}
-		if(manoc[0]==3 && manoc[1]<3){
-			jugada=manoc[1];
-		}
-		if(manoc[1]==3 && manoc[0]<3){
-			jugada=manoc[0];
-		}
-		if(manoc[0]==2&& manoc[1]==2){
-			jugada=manoc[0];
-		}
-		if(manoc[0]==2 && manoc[1]<2){
-			jugada=manoc[1];
-		}
-		if(manoc[1]==2 && manoc[0]<2){
-			jugada=manoc[0];
-		}
-		if(manoc[0]==1&&manoc[1]==1){
-			jugada=manoc[0];
-		}
+		if(manoc[0]==6 && manoc[1]<6)jugada=manoc[1];
+		if(manoc[1]==6 && manoc[0]<6)jugada=manoc[0];
+		if((manoc[0]==5 && manoc[1]==4)||(manoc[0]==5 && manoc[1]==1))jugada=manoc[1];
+		if((manoc[1]==5 && manoc[0]==4)||(manoc[1]==5 && manoc[0]==1))jugada=manoc[0];
+		if((manoc[0]==5 && fuera.contains("8"))||(manoc[0]==5&&manoc[1]<4))jugada=manoc[0];
+		if((manoc[1]==5 && fuera.contains("8"))||(manoc[1]==5&&manoc[0]<4))jugada=manoc[1];
+		if(manoc[0]==4 && manoc[1]==4)jugada=manoc[0];
+		if(manoc[0]==4 && manoc[1]<4)jugada=manoc[1];
+		if(manoc[0]==4 && manoc[1]<4)jugada=manoc[1];
+		if(manoc[1]==4 && manoc[0]<4)jugada=manoc[0];
+		if(manoc[0]==3 && manoc[1]==3)jugada=manoc[0];
+		if(manoc[0]==3 && manoc[1]<3)jugada=manoc[1];
+		if(manoc[1]==3 && manoc[0]<3)jugada=manoc[0];
+		if(manoc[0]==2&& manoc[1]==2)jugada=manoc[0];
+		if(manoc[0]==2 && manoc[1]<2)jugada=manoc[1];
+		if(manoc[1]==2 && manoc[0]<2)jugada=manoc[0];
+		if(manoc[0]==1&&manoc[1]==1)jugada=manoc[0];
 		
 		switch(jugada){
 		case 1:
-			int choice = (int)((Math.random()*6)+2);
-			System.out.println("Tu carta es " + choice);
-			if(manoj[0]==choice){
-				System.out.println("Lo sabia!");
-				tkp2++;
-				round = false;
+			if(!handmaid[0]){
+				int choice = (int)((Math.random()*6)+2);
+				System.out.println("Juego con un guardia.\n Tu carta es " + choice);
+				if(manoj[0]==choice){
+					System.out.println("Lo sabia!");
+					tkp2++;
+					p=3;
+					round = false;
+				}else{
+					System.out.println("Adivinare la proxima!");
+				}
 			}else{
-				System.out.println("Adivinare la proxima!");
+				System.out.println("Juego con un guardia.\n Estas protegido, solo alargas lo inevitable!");
 			}
 			break;
 		case 2:
-			System.out.println("Tu carta es " + manoj[0]);
+			if(!handmaid[0]){
+				System.out.println("Juego con un Priest");
+				System.out.println("Tu carta es " + manoj[0]);
+			}else{
+				System.out.println("Juego con un Priest... pero tu handmaid no deja ver tu carta...");
+			}
 			break;
 		case 3:
-			op="1";	
-			carta(3, 1);
+			if(!handmaid[0]){
+				System.out.println("Juego con Baron.");
+				carta(3);
+			}else{
+				System.out.println("Juego con Baron.\n Handmaid te ha salvado!");
+			}
 			break;
 		case 4:
-			System.out.println("Ahora estoy protegido.");
+			System.out.println("Juego con Handmaid, ahora estoy protegido.");
 			handmaid[1]=true;
 			break;
 		case 5:
@@ -347,7 +326,12 @@ public class Juego {
 			}
 			break;
 		case 6:
-			carta(6, 1);
+			if(!handmaid[0]){
+				System.out.println("Juego con King!");
+				carta(6);
+			}else{
+				System.out.println("Juego con King!\n me quedare con mi carta gracias a tu handmaid.");
+			}
 			break;
 		case 7:
 			System.out.println("Juego con la Countess");
@@ -355,9 +339,11 @@ public class Juego {
 		case 8:
 			System.out.println("Debo descartar a la princesa...");
 			tkp1++;
+			p=2;
 			round=false;
 			break;
 		}
+		fuera+= ", " + jugada;		
 	}
 }
 
