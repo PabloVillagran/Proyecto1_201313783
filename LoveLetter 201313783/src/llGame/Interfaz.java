@@ -5,7 +5,7 @@ import java.util.Scanner;
 class Interfaz {
 	Scanner sc = new Scanner(System.in);
 	public int tokens=7;
-	public static String reglas []={"--Carta(Valor): descripcion<# de cartas en el maso>--"
+	static public String reglas []={"--Carta(Valor): descripcion<# de cartas en el maso>--"
 			, "Guard [1]: trata de adivinar la carta del oponente, si es correcto el oponente pierde la ronda!<5>"
 			, "Priest [2]: ve la carta del oponente!<2>"
 			, "Baron [3]: compara tu carta y la del oponente, la carta mas alta gana la ronda!<2>"
@@ -14,12 +14,13 @@ class Interfaz {
 			, "King [6]: Intercambia las manos de los jugadores!<1>"
 			, "Countess [7]: Carta mas alta, se debe descartar si hay un rey o principe en la mano!<1>"
 			, "Princess [8]: Si se descarta a la princesa se pierde la ronda!<1>"};
+	static Juego juego;
+	boolean debug=false;
 	
 	public Interfaz(){
-		this.menu1();
+		menu1();
 	}
 	
-	@SuppressWarnings ("unused")
 	void menu1(){
 		String op;
 		System.out.println("-=Bienvenido a Love Letter=-\n"
@@ -38,7 +39,8 @@ class Interfaz {
 			}catch(IOException e){
 				e.printStackTrace();
 			}*/
-			Juego juego = new Juego(tokens);
+			juego = new Juego(tokens, debug);
+			juego.barajear();
 			break;
 		case "2":
 			System.out.println("Seleccione el numero de tokes a jugar:\n "
@@ -53,13 +55,18 @@ class Interfaz {
 			this.menu1();
 			break;
 		case "3":
-			this.instrucciones();
+			instrucciones();
 			break;
 		case "4":
 			System.exit(0);
 			break;
+		case "debug":
+			debug=true;
+			this.menu1();
+			break;
 		default:
 			System.out.println("Ingrese una opcion valida");
+			debug=false;
 			this.menu1();
 			break;
 		}

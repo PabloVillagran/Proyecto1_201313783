@@ -6,23 +6,36 @@ import llGame.Interfaz;
 
 public class Juego {
 	Scanner sc = new Scanner(System.in);
-	int tk, tkp1, tkp2;
-	int cartas [] = {1,1,1,1,1,2,2,3,3,4,4,5,5,6,7,8};
+	int tokens, tokenp1, tokenp2;
+	int cartas [] = new int[16];
 	int mazo[]= new int[16];
-	String jugador1, jugador2, fuera, op;
+	String jugador1, jugador2, fuera, op, oculta;
 	int[] manoj= new int[2], manoc = new int [2];
-	boolean round;int nmazo=16; int p=0;
-	private boolean[] handmaid={false,false};
+	boolean round;int nmazo=16; int p;
+	boolean[] handmaid={false,false};
+	boolean debug;
 	
-	public Juego(int tokens){
-		this.tk=tokens;
-		tkp1=0; tkp2=0;
-		barajear();
+	public Juego(int tokens, boolean debug){
+		this.tokens=tokens;
+		tokenp1=0; tokenp2=0;
+		this.debug=debug;
+		p=0;
 	}
 
 	void barajear(){
 		for(int j=0; j<=15; j++)mazo[j]=0;
+		int valor=1;
+		for(int k=0;k<=15;k++){
+			if(k==5)valor++;
+			if(k==7)valor++;
+			if(k==9)valor++;
+			if(k==11)valor++;
+			if(k>12)valor++;
+			cartas[k]=valor;
+		}
 		nmazo=16;
+		fuera="";
+		handmaid[0]=false;handmaid[1]=false;
 		for(int i=0; i<=15;i++){
 			while(mazo[i]==0){
 				//System.out.println("-JUEGO-");
@@ -35,11 +48,17 @@ public class Juego {
 				}
 			}
 		}
+		
+		if(debug){
+			System.out.print("Mazo: ");
+			for(int i=0;i<=15;i++)System.out.print(mazo[i] +", ");
+			System.out.print("\n");
+		}
+		
 		round=true;
 		partida();
 	}
 	
-	@SuppressWarnings("unused")
 	void partida(){
 		
 		if(p==0){
@@ -47,33 +66,41 @@ public class Juego {
 			jugador1 = sc.nextLine();
 			System.out.println("¿Conoces a tu oponente?, ¿Quien es?");
 			jugador2 = sc.nextLine();
-			System.out.println("Ve, busca a la princesa o a alguien que le pueda entregar tu carta!\n");
-			p=1;
+			if((int)((Math.random()*9))<5){
+				p=1;
+				System.out.println("Comenzara " + jugador1 + "!!");
+			}else{
+				p=2;
+				System.out.println("Comenzara " + jugador2 + "!!");
+			}
+			System.out.println("El primero en tener "+ tokens+ " tokens gana !");
 		}
-		
+		if(debug)fuera= "oculta["+oculta+"]";
 		String oculta = String.valueOf(mazo[15]);
-		fuera = mazo[12]+", "+mazo[13]+", "+mazo[14];
-		manoj[0]=mazo[11]; 
-		manoc[0]=mazo[10];
+		fuera = fuera+", "+mazo[12]+", "+mazo[13]+", "+mazo[14];
+		manoc[0]=mazo[11];
+		manoj[0]=mazo[10];
 		for(int i=15;i>=10;i--)mazo[i]=0;
 		nmazo = 10;
 		
 		while(round){
-			turno(p);
 			if(mazo[0]==0){
+				op="1";
 				carta(3);
 			}
+			turno(p);
+			metodoDebug();
 		}
 		
-		if(tkp1<tk || tkp2<tk){
+		if(!((tokenp1<tokens) ^ (tokenp2<tokens))){
 			barajear();
 		}else{
 			round=false;
 			String ganador="";
-			if(p==1)ganador=jugador1;
-			if(p==2)ganador=jugador2;
+			if(p==1)ganador=jugador2;
+			if(p==2)ganador=jugador1;
 			System.out.println("-|| Fin de la partida! ||-\n"
-					+ "El ganador es: " + ganador );
+					+ "-||El ganador es: " + ganador + "||-");
 		}
 		
 	}
@@ -84,6 +111,7 @@ public class Juego {
 			mazo[nmazo-1]=0;
 			nmazo--;
 			interfaz();
+			handmaid[1]=false;
 			p++;
 		}
 		if(q==2){
@@ -91,16 +119,17 @@ public class Juego {
 			mazo[nmazo-1]=0;
 			nmazo--;
 			logica();
+			handmaid[0]=false;
 			p--;
 		}
 	}
 
 	void interfaz(){
 		
-		System.out.print(jugador2+" (" + tkp2 +" tokens)"+" cartas: [X]\n"
+		System.out.print(jugador2+" (" + tokenp2 +" tokens)"+" cartas: [X]\n"
 				+ "Mazo: "+ nmazo +".\n"
 				+ "Cartas fuera de juego: " + fuera + ".\n"
-				+ jugador1+" (" + tkp1+" tokens)"+" Tienes en tu mano: \n"
+				+ jugador1+" (" + tokenp1+" tokens)"+" Tienes en tu mano: \n"
 				+ "(1) "+Interfaz.reglas[manoj[0]]+"\n"
 				+ "(2) "+Interfaz.reglas[manoj[1]]+"\n"
 				+ "(3) Terminar el juego.\n"
@@ -114,7 +143,7 @@ public class Juego {
 			}
 		}
 		if(manoj[0]==7&& op.contains("2")){
-			if(manoj[1]==5||manoj[0]==6){
+			if(manoj[1]==5||manoj[1]==6){
 				System.out.println("Descarte de Countess obligatorio!");
 				interfaz();
 			}
@@ -151,9 +180,9 @@ public class Juego {
 					+ "(2)Priest, (3)Baron, (4)Handmaid, (5)Prience, "
 					+ "(6)King, (7)Contess, (8)Princess\n"
 					+ "Ingrese el numero de la carta que desea adivinar.");
-			if(sc.next().compareTo(String.valueOf(manoc[0]))== 0){
+			if((sc.next().compareTo(String.valueOf(manoc[0])))== 0){
 				System.out.println("Has descubierto a tu oponente! Ganas el round");
-				tkp1++;
+				tokenp1++;
 				p=0;
 				round = false;
 			}else{
@@ -172,19 +201,19 @@ public class Juego {
 				valor=manoj[1];
 			}
 			System.out.println("Tu carta es "
-					+Interfaz.reglas[valor].substring(0, Interfaz.reglas[valor].indexOf(":")-1)
+					+Interfaz.reglas[valor].substring(0, Interfaz.reglas[valor].indexOf(":"))
 					+" La carta de "+jugador2+" es " 
-					+Interfaz.reglas[manoc[0]].substring(0, Interfaz.reglas[valor].indexOf(":")-1)
+					+Interfaz.reglas[manoc[0]].substring(0, Interfaz.reglas[valor].indexOf(":"))
 			);
 			if(valor > manoc[0]){
 				System.out.println("Tu carta es mayor! ganas la ronda!");
-				tkp1++;
+				tokenp1++;
 				p=0;
 				round = false;
 			}
 			if(valor < manoc[0]){
 				System.out.println("Tu carta es menor! pierdes la ronda!");
-				tkp2++;
+				tokenp2++;
 				p=1;
 				round = false;
 			}
@@ -196,17 +225,21 @@ public class Juego {
 		case 5:
 			System.out.println("Deseas descartar tu mano o la de tu oponente?\n"
 					+ "(1) tu mano?\n (2) su mano?");
-			if(sc.next().contains("1")){
+			op=sc.next();
+			if(op.contains("1")){
 				manoj[0]=mazo[nmazo-1];
+				fuera=fuera+", "+manoj[0];
 				mazo[nmazo-1]=0;
 				nmazo--;
-			}else if((sc.next().contains("2")) && (!handmaid[1])){
+			}else if(op.contains("2") && (!handmaid[1])){
 				if(manoc[0]==8){
 					System.out.println(jugador2 + " ha descartado a la princesa! Ganas el round!");
-					tkp1++;
+					fuera=fuera+", "+manoj[0];
+					tokenp1++;
 					p=0;
 					round=false;
 				}else{
+					fuera=fuera+", "+manoc[0];
 					manoc[0]=mazo[nmazo-1];
 					mazo[nmazo-1]=0;
 					nmazo--;
@@ -227,7 +260,8 @@ public class Juego {
 				System.out.println("Se cambiaran las cartas. ");
 				manoj[1]=manoc[0];
 				manoc[0]=manoj[0];
-				manoj[0]=0;
+				manoj[0]=manoj[1];
+				manoj[1]=0;
 			}
 			break;
 		case 7:
@@ -235,8 +269,9 @@ public class Juego {
 			break;
 		case 8:
 			System.out.println("La princesa ha sido descartada! pierdes la ronda.");
-			tkp2++;
+			tokenp2++;
 			p=1;
+			round=false;
 			break;
 		}
 	
@@ -246,31 +281,60 @@ public class Juego {
 		System.out.println(jugador2 + ": Ahora es mi turno!");
 		
 		int jugada=0;
-		if(manoc[0]==8)jugada=manoc[1];
-		if(manoc[1]==8)jugada=manoc[0];
-		if(manoc[0]==7 && (manoc[1]==5||manoc[1]==6)){
-			jugada=manoc[0];
-		}else{jugada=manoc[1];} 
-		if(manoc[1]==7 && (manoc[0]==5||manoc[0]==6)){
+		if(manoc[0]==8){
 			jugada=manoc[1];
-		}else{jugada=manoc[0];}
-		if(manoc[0]==6 && manoc[1]<6)jugada=manoc[1];
-		if(manoc[1]==6 && manoc[0]<6)jugada=manoc[0];
-		if((manoc[0]==5 && manoc[1]==4)||(manoc[0]==5 && manoc[1]==1))jugada=manoc[1];
-		if((manoc[1]==5 && manoc[0]==4)||(manoc[1]==5 && manoc[0]==1))jugada=manoc[0];
-		if((manoc[0]==5 && fuera.contains("8"))||(manoc[0]==5&&manoc[1]<4))jugada=manoc[0];
-		if((manoc[1]==5 && fuera.contains("8"))||(manoc[1]==5&&manoc[0]<4))jugada=manoc[1];
-		if(manoc[0]==4 && manoc[1]==4)jugada=manoc[0];
-		if(manoc[0]==4 && manoc[1]<4)jugada=manoc[1];
-		if(manoc[0]==4 && manoc[1]<4)jugada=manoc[1];
-		if(manoc[1]==4 && manoc[0]<4)jugada=manoc[0];
-		if(manoc[0]==3 && manoc[1]==3)jugada=manoc[0];
-		if(manoc[0]==3 && manoc[1]<3)jugada=manoc[1];
-		if(manoc[1]==3 && manoc[0]<3)jugada=manoc[0];
-		if(manoc[0]==2&& manoc[1]==2)jugada=manoc[0];
-		if(manoc[0]==2 && manoc[1]<2)jugada=manoc[1];
-		if(manoc[1]==2 && manoc[0]<2)jugada=manoc[0];
-		if(manoc[0]==1&&manoc[1]==1)jugada=manoc[0];
+		}else if(manoc[1]==8){
+			jugada=manoc[0];
+			manoc[0]=manoc[1];
+		}else if(manoc[0]==7 && (manoc[1]==5||manoc[1]==6)){
+			jugada=manoc[0];
+			manoc[0]=manoc[1];
+		}else if(manoc[1]==7 && (manoc[0]==5||manoc[0]==6)){
+			jugada=manoc[1];
+		}else if(manoc[0]==6 && manoc[1]<6){
+			jugada=manoc[1];
+		}else if(manoc[1]==6 && manoc[0]<6){
+			jugada=manoc[0];
+			manoc[0]=manoc[1];
+		}else if((manoc[0]==5 && manoc[1]==4)||(manoc[0]==5 && manoc[1]==1)){
+			jugada=manoc[1];
+		}else if((manoc[1]==5 && manoc[0]==4)||(manoc[1]==5 && manoc[0]==1)){
+			jugada=manoc[0];
+			manoc[0]=manoc[1];
+		}else if((manoc[0]==5 && fuera.contains("8"))||(manoc[0]==5&&manoc[1]<4)){
+			jugada=manoc[0];
+			manoc[0]=manoc[1];
+		}else if((manoc[1]==5 && fuera.contains("8"))||(manoc[1]==5&&manoc[0]<4)){
+			jugada=manoc[1];
+		}else if(manoc[0]==4 && manoc[1]==4){
+			jugada=manoc[0];
+			manoc[0]=manoc[1];
+		}else if(manoc[0]==4 && manoc[1]<4){
+			jugada=manoc[1];
+		}else if(manoc[1]==4 && manoc[0]<4){
+			jugada=manoc[0];
+			manoc[0]=manoc[1];
+		}else if(manoc[0]==3 && manoc[1]==3){
+			jugada=manoc[0];
+			manoc[0]=manoc[1];
+		}else if(manoc[0]==3 && manoc[1]<3){
+			jugada=manoc[1];
+		}else if(manoc[1]==3 && manoc[0]<3){
+			jugada=manoc[0];
+			manoc[0]=manoc[1];
+		}else if(manoc[0]==2&& manoc[1]==2){
+			jugada=manoc[0];
+			manoc[0]=manoc[1];
+		}else if(manoc[0]==2 && manoc[1]<2){
+			jugada=manoc[1];
+		}else if(manoc[1]==2 && manoc[0]<2){
+			jugada=manoc[0];
+			manoc[0]=manoc[1];
+		}else if(manoc[0]==1&&manoc[1]==1){
+			jugada=manoc[0];
+			manoc[0]=manoc[1];
+		}
+		manoc[1]=0;
 		
 		switch(jugada){
 		case 1:
@@ -279,7 +343,7 @@ public class Juego {
 				System.out.println("Juego con un guardia.\n Tu carta es " + choice);
 				if(manoj[0]==choice){
 					System.out.println("Lo sabia!");
-					tkp2++;
+					tokenp2++;
 					p=3;
 					round = false;
 				}else{
@@ -300,6 +364,7 @@ public class Juego {
 		case 3:
 			if(!handmaid[0]){
 				System.out.println("Juego con Baron.");
+				op="1";
 				carta(3);
 			}else{
 				System.out.println("Juego con Baron.\n Handmaid te ha salvado!");
@@ -310,16 +375,15 @@ public class Juego {
 			handmaid[1]=true;
 			break;
 		case 5:
-			if(manoj[0]<4 || manoj[1]<4 || handmaid[0]){
+			if(manoj[0]<4 || handmaid[0]){
 				System.out.println("Juego Prince, y descarto mi mano.");
-				fuera= ", " + manoj[0];
-				manoc[0]=manoc[1];
+				fuera= fuera + ", " + manoc[0];
 				manoc[0]=mazo[nmazo-1];
 				mazo[nmazo-1]=0;
 				nmazo--;
 			}else{
 				System.out.println("Juego Prince, debes descartar tu mano");
-				fuera = ", "+manoj[0];
+				fuera = fuera + ", "+manoj[0];
 				manoj[0]=mazo[nmazo-1];
 				mazo[nmazo-1]=0;
 				nmazo--;
@@ -338,12 +402,23 @@ public class Juego {
 			break;
 		case 8:
 			System.out.println("Debo descartar a la princesa...");
-			tkp1++;
+			tokenp2++;
 			p=2;
 			round=false;
 			break;
+		default:
+			break;
 		}
-		fuera+= ", " + jugada;		
+		fuera= fuera + ", " + jugada;
+	}
+	
+	void metodoDebug(){
+		if(debug){
+			System.out.print("Mazo: ");
+			for(int i=0;i<=15;i++)System.out.print(mazo[i] +", ");
+			System.out.print("\n Mano oponente: ");
+			for(int i=0; i<=1;i++)System.out.print(manoc[i]+", ");
+		}
 	}
 }
 
